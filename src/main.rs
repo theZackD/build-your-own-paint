@@ -7,6 +7,12 @@ struct Vec2 {
     y: f32,
 }
 
+struct Image {
+    width: usize,
+    height: usize,
+    pixels: Vec<u8>,
+}
+
 fn dot(a: Vec2, b: Vec2) -> f32 {
     a.x * b.x + a.y * b.y
 }
@@ -37,9 +43,26 @@ impl Sub for Vec2 {
     }
 }
 
+impl Vec2 {
+    fn new(x: f32, y: f32) -> Vec2 {
+        Vec2 { x, y }
+    }
+}
+
 impl std::fmt::Display for Vec2 {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(f, "({},{})", self.x, self.y)
+    }
+}
+
+impl Image {
+    fn new(w: usize, h: usize) -> Image {
+        let pixels = vec![0; w * h * 3];
+        Image {
+            width: w,
+            height: h,
+            pixels,
+        }
     }
 }
 
@@ -66,6 +89,18 @@ fn plus_long(pts: &[Vec2]) -> Option<Vec2> {
     }
 
     pl
+}
+
+fn normaliser(a: &Vec2) -> Result<Vec2, String> {
+    let len = a.length();
+    if len == 0.0 {
+        Err(String::from("Vecteur nul !"))
+    } else {
+        Ok(Vec2 {
+            x: a.x / len,
+            y: a.y / len,
+        })
+    }
 }
 
 fn main() {
@@ -99,4 +134,14 @@ fn main() {
         Some(p) => println!("Plus long: {}", p),
         None => println!("Rien !"),
     };
+
+    match normaliser(&Vec2 { x: 3.0, y: 4.0 }) {
+        Ok(r) => println!("Vecteur: {}", r),
+        Err(e) => println!("Erreur : {}", e),
+    }
+
+    match normaliser(&Vec2 { x: 0.0, y: 0.0 }) {
+        Ok(r) => println!("Vecteur: {}", r),
+        Err(e) => println!("Erreur : {}", e),
+    }
 }
