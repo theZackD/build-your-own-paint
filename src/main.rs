@@ -1,107 +1,8 @@
-use std::ops::Add;
-use std::ops::Sub;
+mod vec2;
+use vec2::Vec2;
 
-#[derive(Clone, Copy)]
-struct Vec2 {
-    x: f32,
-    y: f32,
-}
-
-struct Image {
-    width: usize,
-    height: usize,
-    pixels: Vec<u8>,
-}
-
-fn dot(a: Vec2, b: Vec2) -> f32 {
-    a.x * b.x + a.y * b.y
-}
-
-impl Vec2 {
-    fn length(&self) -> f32 {
-        dot(*self, *self).sqrt()
-    }
-}
-
-impl Add for Vec2 {
-    type Output = Vec2;
-    fn add(self, other: Vec2) -> Vec2 {
-        Vec2 {
-            x: self.x + other.x,
-            y: self.y + other.y,
-        }
-    }
-}
-
-impl Sub for Vec2 {
-    type Output = Vec2;
-    fn sub(self, other: Vec2) -> Vec2 {
-        Vec2 {
-            x: self.x - other.x,
-            y: self.y - other.y,
-        }
-    }
-}
-
-impl Vec2 {
-    fn new(x: f32, y: f32) -> Vec2 {
-        Vec2 { x, y }
-    }
-}
-
-impl std::fmt::Display for Vec2 {
-    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "({},{})", self.x, self.y)
-    }
-}
-
-impl Image {
-    fn new(w: usize, h: usize) -> Image {
-        let pixels = vec![0; w * h * 3];
-        Image {
-            width: w,
-            height: h,
-            pixels,
-        }
-    }
-}
-
-fn nombre(pts: &[Vec2]) -> usize {
-    pts.len()
-}
-
-fn longueur_totale(pts: &[Vec2]) -> f32 {
-    let mut total: f32 = 0.0;
-    for p in pts {
-        total += p.length();
-    }
-    total
-}
-
-fn plus_long(pts: &[Vec2]) -> Option<Vec2> {
-    let mut max: f32 = 0.0;
-    let mut pl: Option<Vec2> = None;
-    for p in pts {
-        if p.length() >= max {
-            pl = Some(*p);
-            max = p.length();
-        }
-    }
-
-    pl
-}
-
-fn normaliser(a: &Vec2) -> Result<Vec2, String> {
-    let len = a.length();
-    if len == 0.0 {
-        Err(String::from("Vecteur nul !"))
-    } else {
-        Ok(Vec2 {
-            x: a.x / len,
-            y: a.y / len,
-        })
-    }
-}
+mod image;
+use image::Image;
 
 fn main() {
     let mut pts: Vec<Vec2> = Vec::new();
@@ -117,31 +18,56 @@ fn main() {
         total += p.length();
     }
 
-    let total2 = longueur_totale(&pts);
+    let total2 = vec2::longueur_totale(&pts);
 
-    let num = nombre(&pts);
+    let num = vec2::nombre(&pts);
 
     println!("Total is {}", total);
     println!("Longueur totale est: {}", total2);
     println!("Nombre: {}", num);
 
-    match plus_long(&pts) {
+    match vec2::plus_long(&pts) {
         Some(p) => println!("Plus long: {}", p),
         None => println!("Rien !"),
     };
 
-    match plus_long(&vide) {
+    match vec2::plus_long(&vide) {
         Some(p) => println!("Plus long: {}", p),
         None => println!("Rien !"),
     };
 
-    match normaliser(&Vec2 { x: 3.0, y: 4.0 }) {
+    match vec2::normaliser(&Vec2 { x: 3.0, y: 4.0 }) {
         Ok(r) => println!("Vecteur: {}", r),
         Err(e) => println!("Erreur : {}", e),
     }
 
-    match normaliser(&Vec2 { x: 0.0, y: 0.0 }) {
+    match vec2::normaliser(&Vec2 { x: 0.0, y: 0.0 }) {
         Ok(r) => println!("Vecteur: {}", r),
         Err(e) => println!("Erreur : {}", e),
+    }
+
+    let mut img = Image::new(4, 3);
+    println!(
+        "Width: {}\nHeight: {}\nPixels length: {}",
+        img.width,
+        img.height,
+        img.pixels.len()
+    );
+
+    img.set_pixel(1, 2, 255, 0, 0);
+    img.set_pixel(10, 10, 1, 2, 3);
+    println!("{}", img.pixels[(2 * 4 + 1) * 3]);
+
+    match image::save_ppm(&img, "out.ppm") {
+        Ok(()) => println!("fichier écrit"),
+        Err(e) => println!("erreur : {}", e),
+    }
+
+    let mut img2 = Image::new(6, 4);
+    image::fill_rectangle(&mut img2, 3, 2, 3, 2, 255, 0, 0);
+
+    match image::save_ppm(&img2, "out2.ppm") {
+        Ok(()) => println!("fichier écrit"),
+        Err(e) => println!("erreur : {}", e),
     }
 }
