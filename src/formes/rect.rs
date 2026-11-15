@@ -41,7 +41,7 @@ pub fn dessiner_contour(buffer: &mut [u32], r: &Rect, e: usize, color: u32) {
         y: r.y.saturating_sub(e),
         w: r.w + 2 * e,
         h: r.h + 2 * e,
-        color: color,
+        color,
     };
     dessiner(buffer, &r_prime);
 }
