@@ -1,16 +1,5 @@
 use crate::config::{HAUTEUR, LARGEUR};
 use crate::couleur::hsv_vers_u32;
-use crate::rect::Rect;
-
-pub fn dessiner(buffer: &mut [u32], r: &Rect) {
-    for i in 0..r.w {
-        for j in 0..r.h {
-            if r.x + i < LARGEUR && r.y + j < HAUTEUR {
-                buffer[(r.x + i) + LARGEUR * (r.y + j)] = r.color;
-            }
-        }
-    }
-}
 
 pub fn dessiner_barre_teinte(buffer: &mut [u32], x0: usize, y0: usize, w: usize, h: usize) {
     for i in 0..h {
@@ -21,17 +10,6 @@ pub fn dessiner_barre_teinte(buffer: &mut [u32], x0: usize, y0: usize, w: usize,
             }
         }
     }
-}
-
-pub fn dessiner_contour(buffer: &mut [u32], r: &Rect, e: usize, color: u32) {
-    let r_prime = Rect {
-        x: r.x.saturating_sub(e),
-        y: r.y.saturating_sub(e),
-        w: r.w + 2 * e,
-        h: r.h + 2 * e,
-        color: color,
-    };
-    dessiner(buffer, &r_prime);
 }
 
 pub fn dessiner_disque(buffer: &mut [u32], cx: usize, cy: usize, r: usize, color: u32) {

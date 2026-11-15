@@ -1,3 +1,5 @@
+use crate::config::{HAUTEUR, LARGEUR};
+
 #[derive(Clone, Copy)]
 pub struct Rect {
     pub x: usize,
@@ -23,13 +25,23 @@ pub fn contient(r: &Rect, p: (f32, f32)) -> bool {
         && (p.1 as usize) < r.y + r.h
 }
 
-pub fn rect_sous_souris(rects: &[Rect], p: (f32, f32)) -> Option<usize> {
-    let mut res = None;
-    for (i, r) in rects.iter().enumerate().rev() {
-        if contient(r, p) {
-            res = Some(i);
-            break;
+pub fn dessiner(buffer: &mut [u32], r: &Rect) {
+    for i in 0..r.w {
+        for j in 0..r.h {
+            if r.x + i < LARGEUR && r.y + j < HAUTEUR {
+                buffer[(r.x + i) + LARGEUR * (r.y + j)] = r.color;
+            }
         }
     }
-    res
+}
+
+pub fn dessiner_contour(buffer: &mut [u32], r: &Rect, e: usize, color: u32) {
+    let r_prime = Rect {
+        x: r.x.saturating_sub(e),
+        y: r.y.saturating_sub(e),
+        w: r.w + 2 * e,
+        h: r.h + 2 * e,
+        color: color,
+    };
+    dessiner(buffer, &r_prime);
 }

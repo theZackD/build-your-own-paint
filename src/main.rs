@@ -10,25 +10,20 @@ use image::Image;
 mod config;
 use config::{HAUTEUR, LARGEUR};
 
-mod rect;
-use rect::{Rect, contient, rect_depuis_points, rect_sous_souris};
+mod raster;
+use raster::{dessiner_barre_teinte, dessiner_carre_sv, dessiner_disque, dessiner_ligne};
+
+mod formes;
+use formes::{
+    Forme, Outil, Rect, contient, dessiner, dessiner_contour, dessiner_forme, dessiner_selection,
+    forme_depuis_points, forme_sous_souris, placer, position,
+};
 
 mod action;
 use action::Action;
 
 mod couleur;
 use couleur::hsv_vers_u32;
-
-mod dessin;
-use dessin::{
-    dessiner, dessiner_barre_teinte, dessiner_carre_sv, dessiner_contour, dessiner_disque,
-    dessiner_ligne,
-};
-
-mod forme;
-use forme::{
-    Forme, Outil, dessiner_forme, forme_depuis_points, forme_sous_souris, placer, position,
-};
 
 use minifb::{Key, KeyRepeat, MouseButton, MouseMode, Window, WindowOptions};
 
@@ -43,6 +38,7 @@ fn main() {
     let mut outil = Outil::Rectangle;
 
     let mut action = Action::Rien;
+    let mut selected: Option<usize> = None;
     let mut decalage: (f32, f32) = (0.0, 0.0);
 
     let mut teinte: f32 = 0.0;
@@ -80,13 +76,17 @@ fn main() {
     };
 
     let rect_but = Rect {
-        x: LARGEUR - 180,
+        x: LARGEUR - 230,
         y: 20,
         w: 40,
         h: 40,
         color: 0x00FFFFFF,
     };
     let disque_but = Rect {
+        x: LARGEUR - 180,
+        ..rect_but
+    };
+    let ligne_but = Rect {
         x: LARGEUR - 130,
         ..rect_but
     };
@@ -107,6 +107,16 @@ fn main() {
 
         let enfonce = window.get_mouse_down(MouseButton::Left);
 
+        if (window.is_key_pressed(Key::Delete, KeyRepeat::No)
+            || window.is_key_pressed(Key::Backspace, KeyRepeat::No))
+            && !enfonce
+        {
+            if let Some(i) = selected {
+                formes.remove(i);
+                selected = None;
+            }
+        }
+
         if enfonce && !etait_enfonce {
             debut = pos;
             if contient(&color_but, pos) {
@@ -118,6 +128,9 @@ fn main() {
             } else if contient(&disque_but, pos) {
                 outil = Outil::Disque;
                 action = Action::Rien;
+            } else if contient(&ligne_but, pos) {
+                outil = Outil::Ligne;
+                action = Action::Rien;
             } else if picker_ouvert && contient(&color_wheel, pos) {
                 action = Action::Teinte;
             } else if picker_ouvert && contient(&satval_wheel, pos) {
@@ -128,8 +141,12 @@ fn main() {
                         let (fx, fy) = position(&formes[i]);
                         decalage = (pos.0 - fx as f32, pos.1 - fy as f32);
                         action = Action::Deplacement(i);
+                        selected = Some(i);
                     }
-                    None => action = Action::Dessin,
+                    None => {
+                        action = Action::Dessin;
+                        selected = None;
+                    }
                 }
             }
         }
@@ -162,7 +179,10 @@ fn main() {
 
         buffer.fill(0x00FFFFFF);
 
-        for f in &formes {
+        for (i, f) in formes.iter().enumerate() {
+            if selected == Some(i) {
+                dessiner_selection(&mut buffer, f);
+            }
             dessiner_forme(&mut buffer, f);
         }
 
@@ -215,6 +235,23 @@ fn main() {
             disque_but.x + 20,
             disque_but.y + 20,
             12,
+            0x00444444,
+        );
+
+        let ligne_actif = matches!(outil, Outil::Ligne);
+        dessiner_contour(
+            &mut buffer,
+            &ligne_but,
+            if ligne_actif { 6 } else { 3 },
+            if ligne_actif { 0x00000000 } else { 0x00AAAAAA },
+        );
+        dessiner(&mut buffer, &ligne_but);
+        dessiner_ligne(
+            &mut buffer,
+            (ligne_but.x + 8) as i32,
+            (ligne_but.y + 32) as i32,
+            (ligne_but.x + 32) as i32,
+            (ligne_but.y + 8) as i32,
             0x00444444,
         );
 
