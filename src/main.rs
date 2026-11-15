@@ -7,72 +7,61 @@ use vec2::Vec2;
 mod image;
 use image::Image;
 
+mod config;
+use config::{HAUTEUR, LARGEUR};
+
+mod rect;
+use rect::{Rect, contient, rect_depuis_points, rect_sous_souris};
+
+mod action;
+use action::Action;
+
+mod couleur;
+use couleur::hsv_vers_u32;
+
+mod dessin;
+use dessin::{dessiner, dessiner_barre_teinte};
+
 use minifb::{Key, MouseButton, MouseMode, Window, WindowOptions};
 
-#[derive(Clone, Copy)]
-struct Rect {
-    x: usize,
-    y: usize,
-    w: usize,
-    h: usize,
-    color: u32,
-}
-
-fn dessiner(buffer: &mut [u32], r: &Rect) {
-    for i in 0..r.w {
-        for j in 0..r.h {
-            buffer[(r.x + i) + 640 * (r.y + j)] = r.color;
-        }
-    }
-}
-
-fn rect_depuis_points(a: (f32, f32), b: (f32, f32), color: u32) -> Rect {
-    let w = (a.0 - b.0).abs() as usize;
-    let h = (a.1 - b.1).abs() as usize;
-    let x = a.0.min(b.0) as usize;
-    let y = a.1.min(b.1) as usize;
-
-    Rect { x, y, w, h, color }
-}
-
 fn main() {
-    let mut buffer: Vec<u32> = vec![0; 640 * 480];
-    let mut window = Window::new("titre", 640, 480, WindowOptions::default()).unwrap();
+    let mut buffer: Vec<u32> = vec![0; LARGEUR * HAUTEUR];
+    let mut window = Window::new("titre", LARGEUR, HAUTEUR, WindowOptions::default()).unwrap();
 
     let mut etait_enfonce = false;
     let mut debut: (f32, f32) = (0.0, 0.0);
 
     let mut rects: Vec<Rect> = Vec::new();
 
-    while window.is_open() && !window.is_key_down(Key::Escape) {
-        buffer.fill(0);
-        for r in &rects {
-            dessiner(&mut buffer, &r);
-        }
+    let mut action = Action::Rien;
+    let mut decalage: (f32, f32) = (0.0, 0.0);
 
+    while window.is_open() && !window.is_key_down(Key::Escape) {
         let pos: (f32, f32);
-        match window.get_mouse_pos(MouseMode::Discard) {
+        match window.get_mouse_pos(MouseMode::Clamp) {
             Some(p) => pos = p,
             None => pos = (0.0, 0.0),
         }
 
         let enfonce = window.get_mouse_down(MouseButton::Left);
 
-        if enfonce {
-            let apercu = rect_depuis_points(debut, pos, 0x00888888);
-            dessiner(&mut buffer, &apercu);
-        }
-
-        window.update_with_buffer(&buffer, 640, 480).unwrap();
-
         if enfonce && !etait_enfonce {
             debut = pos;
             println!("Début: X: {}, Y: {}", pos.0, pos.1);
+            match rect_sous_souris(&rects, pos) {
+                Some(i) => {
+                    decalage = (pos.0 - (rects[i].x as f32), pos.1 - (rects[i].y as f32));
+                    action = Action::Deplacement(i);
+                }
+                None => action = Action::Dessin,
+            };
         }
         if !enfonce && etait_enfonce {
-            if debut != pos {
+            if debut != pos && matches!(action, Action::Dessin) {
                 rects.push(rect_depuis_points(debut, pos, 0x0000FFCC));
             }
+
+            action = Action::Rien;
 
             println!(
                 "Début: ({}, {}), Fin: ({}, {})",
@@ -81,6 +70,28 @@ fn main() {
 
             println!("Longuer rects: {}", rects.len());
         }
+
+        if enfonce && let Action::Deplacement(i) = action {
+            rects[i].x = (pos.0 - decalage.0) as usize;
+            rects[i].y = (pos.1 - decalage.1) as usize;
+        }
+
+        buffer.fill(0);
+        for r in &rects {
+            dessiner(&mut buffer, &r);
+        }
+        let xbar = LARGEUR - 20 - 10;
+        let ybar = (HAUTEUR - 360) / 2;
+
+        dessiner_barre_teinte(&mut buffer, xbar, ybar, 20, 360);
+        if enfonce && matches!(action, Action::Dessin) {
+            let apercu = rect_depuis_points(debut, pos, 0x00888888);
+            dessiner(&mut buffer, &apercu);
+        }
+
+        window
+            .update_with_buffer(&buffer, LARGEUR, HAUTEUR)
+            .unwrap();
 
         etait_enfonce = enfonce;
     }
