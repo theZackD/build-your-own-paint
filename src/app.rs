@@ -11,15 +11,15 @@ use crate::shapes::{Shape, Tool, shape_under};
 use crate::ui::{ColorPicker, Toolbar};
 use crate::vec2::Vec2;
 
-/// All the state of the application.
+// All the state of the application.
 pub struct App {
     canvas: Canvas,
     shapes: Vec<Shape>,
     tool: Tool,
     action: Action,
-    /// Index of the selected shape in `shapes`. We store an index and not a
-    /// reference: a reference would borrow `shapes` for as long as the
-    /// selection exists, and we could no longer modify the list.
+    // Index of the selected shape in `shapes`. We store an index and not a
+    // reference: a reference would borrow `shapes` for as long as the
+    // selection exists, and we could no longer modify the list.
     selected: Option<usize>,
     toolbar: Toolbar,
     picker: ColorPicker,
