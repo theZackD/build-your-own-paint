@@ -25,6 +25,7 @@ impl Vec2 {
 
     /// Returns a vector of length 1 pointing in the same direction.
     /// Fails for the zero vector, which has no direction.
+    #[allow(dead_code)] // Chapter 1 exercise, not used by the app itself.
     pub fn normalize(self) -> Result<Vec2, String> {
         let len = self.length();
         if len == 0.0 {
@@ -56,6 +57,12 @@ impl Mul<f32> for Vec2 {
     }
 }
 
+impl From<(f32, f32)> for Vec2 {
+    fn from((x, y): (f32, f32)) -> Vec2 {
+        Vec2::new(x, y)
+    }
+}
+
 impl fmt::Display for Vec2 {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "({}, {})", self.x, self.y)
@@ -63,6 +70,7 @@ impl fmt::Display for Vec2 {
 }
 
 /// Returns the longest vector of the slice, or `None` if it is empty.
+#[allow(dead_code)] // Chapter 1 exercise, not used by the app itself.
 pub fn longest(points: &[Vec2]) -> Option<Vec2> {
     let mut best: Option<Vec2> = None;
     for &p in points {

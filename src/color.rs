@@ -1,6 +1,7 @@
 //! Colors are stored as `u32` in the `0x00RRGGBB` format expected by minifb.
 
 pub const WHITE: u32 = 0x00FFFFFF;
+pub const GRAY: u32 = 0x00888888;
 
 pub fn rgb_to_u32(r: u8, g: u8, b: u8) -> u32 {
     ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)
