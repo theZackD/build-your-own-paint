@@ -1,6 +1,9 @@
 use std::fs::File;
 use std::io::{self, Write};
 
+use crate::canvas::Canvas;
+use crate::color::u32_to_rgb;
+
 /// An RGB image, 3 bytes per pixel, that can be saved as a PPM file.
 pub struct Image {
     pub width: usize,
@@ -27,12 +30,15 @@ impl Image {
         self.pixels[i + 2] = b;
     }
 
-    pub fn fill_rect(&mut self, x: usize, y: usize, w: usize, h: usize, rgb: (u8, u8, u8)) {
-        for j in y..y + h {
-            for i in x..x + w {
-                self.set_pixel(i, j, rgb.0, rgb.1, rgb.2);
+    pub fn from_canvas(canvas: &Canvas) -> Image {
+        let mut img = Image::new(canvas.width, canvas.height);
+        for y in 0..canvas.height {
+            for x in 0..canvas.width {
+                let (r, g, b) = u32_to_rgb(canvas.pixels[x + y * canvas.width]);
+                img.set_pixel(x, y, r, g, b);
             }
         }
+        img
     }
 
     /// Writes the image in the binary PPM format (P6): a small text header
