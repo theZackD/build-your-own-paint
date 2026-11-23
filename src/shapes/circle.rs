@@ -18,6 +18,10 @@ impl Circle {
         }
     }
 
+    pub fn contains(&self, p: Vec2) -> bool {
+        (p - self.center).length() <= self.radius
+    }
+
     pub fn draw(&self, canvas: &mut Canvas) {
         canvas.fill_circle(
             self.center.x as usize,

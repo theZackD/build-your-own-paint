@@ -8,4 +8,9 @@ pub enum Action {
     Drawing {
         start: Vec2,
     },
+    /// Moving the shape at `index`; `last` is the mouse position at the previous frame.
+    Moving {
+        index: usize,
+        last: Vec2,
+    },
 }

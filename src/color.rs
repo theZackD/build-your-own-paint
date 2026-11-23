@@ -2,6 +2,7 @@
 
 pub const WHITE: u32 = 0x00FFFFFF;
 pub const GRAY: u32 = 0x00888888;
+pub const SELECTION_BLUE: u32 = 0x00378ADD;
 
 pub fn rgb_to_u32(r: u8, g: u8, b: u8) -> u32 {
     ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)

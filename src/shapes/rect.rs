@@ -29,6 +29,13 @@ impl Rect {
         )
     }
 
+    pub fn contains(&self, p: Vec2) -> bool {
+        p.x >= self.pos.x
+            && p.x < self.pos.x + self.size.x
+            && p.y >= self.pos.y
+            && p.y < self.pos.y + self.size.y
+    }
+
     pub fn draw(&self, canvas: &mut Canvas) {
         canvas.fill_rect(
             self.pos.x as usize,
@@ -37,5 +44,17 @@ impl Rect {
             self.size.y as usize,
             self.color,
         );
+    }
+
+    /// Draws a border around the rectangle by filling a slightly bigger
+    /// rectangle. Call it before `draw` so the rectangle covers the middle.
+    pub fn draw_outline(&self, canvas: &mut Canvas, thickness: f32, color: u32) {
+        let t = Vec2::new(thickness, thickness);
+        Rect {
+            pos: self.pos - t,
+            size: self.size + t * 2.0,
+            color,
+        }
+        .draw(canvas);
     }
 }
