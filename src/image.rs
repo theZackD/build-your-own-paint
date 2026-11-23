@@ -1,6 +1,10 @@
 use std::fs::File;
-use std::io::Write;
+use std::io::{self, Write};
 
+use crate::canvas::Canvas;
+use crate::color::u32_to_rgb;
+
+/// An RGB image, 3 bytes per pixel, that can be saved as a PPM file.
 pub struct Image {
     pub width: usize,
     pub height: usize,
@@ -8,51 +12,41 @@ pub struct Image {
 }
 
 impl Image {
-    pub fn new(w: usize, h: usize) -> Image {
-        let pixels = vec![0; w * h * 3];
+    pub fn new(width: usize, height: usize) -> Image {
         Image {
-            width: w,
-            height: h,
-            pixels,
+            width,
+            height,
+            pixels: vec![0; width * height * 3],
         }
     }
-}
 
-impl Image {
     pub fn set_pixel(&mut self, x: usize, y: usize, r: u8, g: u8, b: u8) {
         if x >= self.width || y >= self.height {
             return;
         }
-
         let i = (x + y * self.width) * 3;
         self.pixels[i] = r;
         self.pixels[i + 1] = g;
         self.pixels[i + 2] = b;
     }
-}
 
-pub fn fill_rectangle(
-    img: &mut Image,
-    x: usize,
-    y: usize,
-    w: usize,
-    h: usize,
-    r: u8,
-    g: u8,
-    b: u8,
-) {
-    for j in 0..h {
-        for i in 0..w {
-            img.set_pixel(x + i, y + j, r, g, b);
+    pub fn from_canvas(canvas: &Canvas) -> Image {
+        let mut img = Image::new(canvas.width, canvas.height);
+        for y in 0..canvas.height {
+            for x in 0..canvas.width {
+                let (r, g, b) = u32_to_rgb(canvas.pixels[x + y * canvas.width]);
+                img.set_pixel(x, y, r, g, b);
+            }
         }
+        img
     }
-}
 
-pub fn save_ppm(img: &Image, path: &str) -> std::io::Result<()> {
-    let mut f = File::create(path)?;
-
-    write!(f, "P6\n{} {}\n255\n", img.width, img.height)?;
-    f.write_all(&img.pixels)?;
-
-    Ok(())
+    /// Writes the image in the binary PPM format (P6): a small text header
+    /// followed by the raw RGB bytes.
+    pub fn save_ppm(&self, path: &str) -> io::Result<()> {
+        let mut f = File::create(path)?;
+        write!(f, "P6\n{} {}\n255\n", self.width, self.height)?;
+        f.write_all(&self.pixels)?;
+        Ok(())
+    }
 }

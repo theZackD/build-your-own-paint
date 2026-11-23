@@ -1,2 +1,2 @@
-pub const LARGEUR: usize = 1080;
-pub const HAUTEUR: usize = 720;
+pub const WIDTH: usize = 1080;
+pub const HEIGHT: usize = 720;
