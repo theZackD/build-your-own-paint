@@ -10,7 +10,7 @@ use crate::canvas::Canvas;
 use crate::color::SELECTION_BLUE;
 use crate::vec2::Vec2;
 
-/// The drawing tool currently selected.
+/// The drawing tool currently selected in the toolbar.
 #[derive(Clone, Copy, Debug, PartialEq)]
 pub enum Tool {
     Rect,

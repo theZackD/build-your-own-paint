@@ -5,6 +5,7 @@ mod color;
 mod config;
 mod image;
 mod shapes;
+mod ui;
 mod vec2;
 
 use minifb::{Key, KeyRepeat, Window, WindowOptions};

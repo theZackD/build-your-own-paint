@@ -4,6 +4,7 @@ use crate::action::Action;
 use crate::canvas::Canvas;
 use crate::color::{GRAY, WHITE, rgb_to_u32};
 use crate::shapes::{Shape, Tool, shape_under};
+use crate::ui::Toolbar;
 use crate::vec2::Vec2;
 
 /// All the state of the application.
@@ -16,6 +17,7 @@ pub struct App {
     /// reference: a reference would borrow `shapes` for as long as the
     /// selection exists, and we could no longer modify the list.
     selected: Option<usize>,
+    toolbar: Toolbar,
     color: u32,
     mouse: Vec2,
     was_down: bool,
@@ -29,6 +31,7 @@ impl App {
             tool: Tool::Rect,
             action: Action::Idle,
             selected: None,
+            toolbar: Toolbar::new(width as f32),
             color: rgb_to_u32(50, 120, 220),
             mouse: Vec2::ZERO,
             was_down: false,
@@ -89,7 +92,11 @@ impl App {
 
     /// The mouse button was just pressed: decide what this drag will do.
     fn on_press(&mut self, p: Vec2) {
-        if let Some(i) = shape_under(&self.shapes, p) {
+        self.action = Action::Idle;
+
+        if let Some(tool) = self.toolbar.tool_at(p) {
+            self.tool = tool;
+        } else if let Some(i) = shape_under(&self.shapes, p) {
             self.selected = Some(i);
             self.action = Action::Moving { index: i, last: p };
         } else {
@@ -135,5 +142,7 @@ impl App {
         if let Action::Drawing { start } = self.action {
             Shape::from_points(self.tool, start, self.mouse, GRAY).draw(&mut self.canvas);
         }
+
+        self.toolbar.draw(&mut self.canvas, self.tool);
     }
 }
