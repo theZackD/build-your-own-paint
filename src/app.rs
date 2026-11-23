@@ -1,15 +1,16 @@
-use minifb::{MouseButton, MouseMode, Window};
+use minifb::{Key, KeyRepeat, MouseButton, MouseMode, Window};
 
 use crate::action::Action;
 use crate::canvas::Canvas;
 use crate::color::{GRAY, WHITE, rgb_to_u32};
-use crate::shapes::Rect;
+use crate::shapes::{Shape, Tool};
 use crate::vec2::Vec2;
 
 /// All the state of the application.
 pub struct App {
     canvas: Canvas,
-    rects: Vec<Rect>,
+    shapes: Vec<Shape>,
+    tool: Tool,
     action: Action,
     color: u32,
     mouse: Vec2,
@@ -20,7 +21,8 @@ impl App {
     pub fn new(width: usize, height: usize) -> App {
         App {
             canvas: Canvas::new(width, height),
-            rects: Vec::new(),
+            shapes: Vec::new(),
+            tool: Tool::Rect,
             action: Action::Idle,
             color: rgb_to_u32(50, 120, 220),
             mouse: Vec2::ZERO,
@@ -32,13 +34,15 @@ impl App {
         &self.canvas
     }
 
-    /// Reads the mouse and updates the state.
+    /// Reads the keyboard and mouse, and updates the state.
     pub fn update(&mut self, window: &Window) {
         self.mouse = window
             .get_mouse_pos(MouseMode::Clamp)
             .map(Vec2::from)
             .unwrap_or(Vec2::ZERO);
         let down = window.get_mouse_down(MouseButton::Left);
+
+        self.handle_keys(window);
 
         // Compare with the previous frame to detect press and release.
         if down && !self.was_down {
@@ -48,6 +52,20 @@ impl App {
             self.on_release(self.mouse);
         }
         self.was_down = down;
+    }
+
+    fn handle_keys(&mut self, window: &Window) {
+        let pressed = |key| window.is_key_pressed(key, KeyRepeat::No);
+
+        if pressed(Key::R) {
+            self.tool = Tool::Rect;
+        }
+        if pressed(Key::C) {
+            self.tool = Tool::Circle;
+        }
+        if pressed(Key::L) {
+            self.tool = Tool::Line;
+        }
     }
 
     /// The mouse button was just pressed: start drawing.
@@ -60,7 +78,8 @@ impl App {
         if let Action::Drawing { start } = self.action
             && start != p
         {
-            self.rects.push(Rect::from_points(start, p, self.color));
+            let shape = Shape::from_points(self.tool, start, p, self.color);
+            self.shapes.push(shape);
         }
         self.action = Action::Idle;
     }
@@ -69,13 +88,13 @@ impl App {
     pub fn render(&mut self) {
         self.canvas.clear(WHITE);
 
-        for rect in &self.rects {
-            rect.draw(&mut self.canvas);
+        for shape in &self.shapes {
+            shape.draw(&mut self.canvas);
         }
 
-        // Preview of the rectangle being drawn.
+        // Preview of the shape being drawn.
         if let Action::Drawing { start } = self.action {
-            Rect::from_points(start, self.mouse, GRAY).draw(&mut self.canvas);
+            Shape::from_points(self.tool, start, self.mouse, GRAY).draw(&mut self.canvas);
         }
     }
 }

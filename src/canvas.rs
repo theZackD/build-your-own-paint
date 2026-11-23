@@ -41,7 +41,6 @@ impl Canvas {
         }
     }
 
-    #[allow(dead_code)] // Used again in chapter 6.
     pub fn fill_circle(&mut self, cx: usize, cy: usize, r: usize, color: u32) {
         let r = r as i32;
         for dy in -r..=r {
@@ -53,7 +52,6 @@ impl Canvas {
         }
     }
 
-    #[allow(dead_code)] // Used again in chapter 6.
     /// Draws a line by stepping along its longest axis, one pixel per step.
     pub fn draw_line(&mut self, x0: i32, y0: i32, x1: i32, y1: i32, color: u32) {
         let dx = x1 - x0;
