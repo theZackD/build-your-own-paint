@@ -1,8 +1,12 @@
+use std::io;
+use std::path::Path;
+
 use minifb::{Key, KeyRepeat, MouseButton, MouseMode, Window};
 
 use crate::action::Action;
 use crate::canvas::Canvas;
 use crate::color::{GRAY, WHITE};
+use crate::image::Image;
 use crate::shapes::{Shape, Tool, shape_under};
 use crate::ui::{ColorPicker, Toolbar};
 use crate::vec2::Vec2;
@@ -91,6 +95,13 @@ impl App {
         {
             self.shapes.remove(i);
         }
+
+        if pressed(Key::S) {
+            match self.export_ppm() {
+                Ok(path) => println!("saved to {path}"),
+                Err(e) => eprintln!("could not save the image: {e}"),
+            }
+        }
     }
 
     /// The mouse button was just pressed: decide what this drag will do.
@@ -159,5 +170,30 @@ impl App {
 
         self.toolbar.draw(&mut self.canvas, self.tool, self.color);
         self.picker.draw(&mut self.canvas);
+    }
+
+    /// Saves the drawing (without the interface) to the first free
+    /// `export_N.ppm` file and returns its name.
+    pub fn export_ppm(&self) -> io::Result<String> {
+        let mut canvas = Canvas::new(self.canvas.width, self.canvas.height);
+        for shape in &self.shapes {
+            shape.draw(&mut canvas);
+        }
+
+        let path = next_free_path("export", "ppm");
+        Image::from_canvas(&canvas).save_ppm(&path)?;
+        Ok(path)
+    }
+}
+
+/// First `{prefix}_{n}.{ext}` file name that does not exist yet.
+fn next_free_path(prefix: &str, ext: &str) -> String {
+    let mut n = 1;
+    loop {
+        let candidate = format!("{prefix}_{n}.{ext}");
+        if !Path::new(&candidate).exists() {
+            break candidate;
+        }
+        n += 1;
     }
 }
