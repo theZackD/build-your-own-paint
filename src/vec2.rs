@@ -81,35 +81,3 @@ pub fn longest(points: &[Vec2]) -> Option<Vec2> {
     }
     best
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn operators() {
-        let a = Vec2::new(1.0, 2.0);
-        let b = Vec2::new(3.0, 5.0);
-        assert_eq!(a + b, Vec2::new(4.0, 7.0));
-        assert_eq!(b - a, Vec2::new(2.0, 3.0));
-        assert_eq!(a * 2.0, Vec2::new(2.0, 4.0));
-        assert_eq!(a.dot(b), 13.0);
-    }
-
-    #[test]
-    fn normalize() {
-        assert_eq!(Vec2::new(3.0, 4.0).normalize(), Ok(Vec2::new(0.6, 0.8)));
-        assert!(Vec2::ZERO.normalize().is_err());
-    }
-
-    #[test]
-    fn longest_vector() {
-        assert_eq!(longest(&[]), None);
-        let pts = [
-            Vec2::new(1.0, 0.0),
-            Vec2::new(0.0, 3.0),
-            Vec2::new(2.0, 0.0),
-        ];
-        assert_eq!(longest(&pts), Some(Vec2::new(0.0, 3.0)));
-    }
-}

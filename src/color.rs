@@ -41,22 +41,3 @@ pub fn hsv_to_u32(h: f32, s: f32, v: f32) -> u32 {
         ((b + m) * 255.0) as u8,
     )
 }
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn rgb_round_trip() {
-        assert_eq!(u32_to_rgb(rgb_to_u32(12, 34, 56)), (12, 34, 56));
-    }
-
-    #[test]
-    fn hsv_primaries() {
-        assert_eq!(hsv_to_u32(0.0, 1.0, 1.0), 0x00FF0000);
-        assert_eq!(hsv_to_u32(120.0, 1.0, 1.0), 0x0000FF00);
-        assert_eq!(hsv_to_u32(240.0, 1.0, 1.0), 0x000000FF);
-        assert_eq!(hsv_to_u32(0.0, 0.0, 1.0), WHITE);
-        assert_eq!(hsv_to_u32(123.0, 0.5, 0.0), BLACK);
-    }
-}

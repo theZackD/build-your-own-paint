@@ -24,9 +24,9 @@ impl Circle {
 
     pub fn draw(&self, canvas: &mut Canvas) {
         canvas.fill_circle(
-            self.center.x as i32,
-            self.center.y as i32,
-            self.radius as i32,
+            self.center.x as usize,
+            self.center.y as usize,
+            self.radius as usize,
             self.color,
         );
     }

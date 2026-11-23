@@ -68,11 +68,17 @@ impl ColorPicker {
         // Hue bar: one hue per row.
         self.hue_bar.draw_outline(canvas, 2.0, BLACK);
         let Rect { pos, size, .. } = self.hue_bar;
-        let rows = size.y as i32;
+        let rows = size.y as usize;
         for row in 0..rows {
             let hue = row as f32 / rows as f32 * 360.0;
             let color = hsv_to_u32(hue, 1.0, 1.0);
-            canvas.fill_rect(pos.x as i32, pos.y as i32 + row, size.x as i32, 1, color);
+            canvas.fill_rect(
+                pos.x as usize,
+                pos.y as usize + row,
+                size.x as usize,
+                1,
+                color,
+            );
         }
 
         // Saturation/value square for the current hue.
@@ -93,15 +99,15 @@ impl ColorPicker {
 
         // Cursor on the square.
         let cursor = pos + Vec2::new(self.sat * size.x, (1.0 - self.val) * size.y);
-        let (cx, cy) = (cursor.x as i32, cursor.y as i32);
+        let (cx, cy) = (cursor.x as usize, cursor.y as usize);
         canvas.fill_circle(cx, cy, 10, BLACK);
         canvas.fill_circle(cx, cy, 9, WHITE);
         canvas.fill_circle(cx, cy, 7, self.color());
 
         // Cursor on the hue bar.
         let bar = self.hue_bar;
-        let hx = (bar.pos.x + bar.size.x / 2.0) as i32;
-        let hy = (bar.pos.y + self.hue / 360.0 * bar.size.y) as i32;
+        let hx = bar.pos.x as usize;
+        let hy = (bar.pos.y + self.hue / 360.0 * bar.size.y) as usize;
         canvas.fill_circle(hx, hy, 10, BLACK);
         canvas.fill_circle(hx, hy, 8, hsv_to_u32(self.hue, 1.0, 1.0));
     }

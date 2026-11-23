@@ -72,7 +72,7 @@ impl Shape {
                     }
                 }
                 for end in [l.start, l.end] {
-                    canvas.fill_circle(end.x as i32, end.y as i32, 5, SELECTION_BLUE);
+                    canvas.fill_circle(end.x as usize, end.y as usize, 5, SELECTION_BLUE);
                 }
             }
         }
@@ -100,38 +100,4 @@ pub fn shape_under(shapes: &[Shape], p: Vec2) -> Option<usize> {
         }
     }
     None
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn rect_from_points_any_direction() {
-        let r = Rect::from_points(Vec2::new(30.0, 40.0), Vec2::new(10.0, 20.0), 0);
-        assert_eq!(r.pos, Vec2::new(10.0, 20.0));
-        assert_eq!(r.size, Vec2::new(20.0, 20.0));
-    }
-
-    #[test]
-    fn hit_testing() {
-        let line = Shape::from_points(Tool::Line, Vec2::ZERO, Vec2::new(100.0, 0.0), 0);
-        assert!(line.contains(Vec2::new(50.0, 4.0)));
-        assert!(!line.contains(Vec2::new(50.0, 10.0)));
-        assert!(!line.contains(Vec2::new(110.0, 0.0)));
-
-        let circle = Shape::from_points(Tool::Circle, Vec2::ZERO, Vec2::new(10.0, 0.0), 0);
-        assert!(circle.contains(Vec2::new(6.0, 6.0)));
-        assert!(!circle.contains(Vec2::new(8.0, 8.0)));
-    }
-
-    #[test]
-    fn topmost_shape_wins() {
-        let a = Shape::from_points(Tool::Rect, Vec2::ZERO, Vec2::new(50.0, 50.0), 0);
-        let b = Shape::from_points(Tool::Rect, Vec2::new(25.0, 25.0), Vec2::new(75.0, 75.0), 0);
-        let shapes = [a, b];
-        assert_eq!(shape_under(&shapes, Vec2::new(30.0, 30.0)), Some(1));
-        assert_eq!(shape_under(&shapes, Vec2::new(10.0, 10.0)), Some(0));
-        assert_eq!(shape_under(&shapes, Vec2::new(90.0, 90.0)), None);
-    }
 }

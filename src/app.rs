@@ -23,12 +23,14 @@ pub struct App {
     selected: Option<usize>,
     toolbar: Toolbar,
     picker: ColorPicker,
+    color: u32,
     mouse: Vec2,
     was_down: bool,
 }
 
 impl App {
     pub fn new(width: usize, height: usize) -> App {
+        let picker = ColorPicker::new(width as f32, height as f32);
         App {
             canvas: Canvas::new(width, height),
             shapes: Vec::new(),
@@ -36,7 +38,8 @@ impl App {
             action: Action::Idle,
             selected: None,
             toolbar: Toolbar::new(width as f32),
-            picker: ColorPicker::new(width as f32, height as f32),
+            color: picker.color(),
+            picker,
             mouse: Vec2::ZERO,
             was_down: false,
         }
@@ -133,6 +136,9 @@ impl App {
             Action::PickingSatVal => self.picker.pick_sat_val(p),
             Action::Idle | Action::Drawing { .. } => {}
         }
+        if self.picker.open {
+            self.color = self.picker.color();
+        }
     }
 
     /// The mouse button was just released.
@@ -140,7 +146,7 @@ impl App {
         if let Action::Drawing { start } = self.action
             && start != p
         {
-            let shape = Shape::from_points(self.tool, start, p, self.picker.color());
+            let shape = Shape::from_points(self.tool, start, p, self.color);
             self.shapes.push(shape);
         }
         self.action = Action::Idle;
@@ -162,8 +168,7 @@ impl App {
             Shape::from_points(self.tool, start, self.mouse, GRAY).draw(&mut self.canvas);
         }
 
-        self.toolbar
-            .draw(&mut self.canvas, self.tool, self.picker.color());
+        self.toolbar.draw(&mut self.canvas, self.tool, self.color);
         self.picker.draw(&mut self.canvas);
     }
 

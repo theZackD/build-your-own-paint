@@ -38,10 +38,10 @@ impl Rect {
 
     pub fn draw(&self, canvas: &mut Canvas) {
         canvas.fill_rect(
-            self.pos.x as i32,
-            self.pos.y as i32,
-            self.size.x as i32,
-            self.size.y as i32,
+            self.pos.x as usize,
+            self.pos.y as usize,
+            self.size.x as usize,
+            self.size.y as usize,
             self.color,
         );
     }

@@ -2,8 +2,7 @@ use crate::color::WHITE;
 
 /// A grid of pixels we can draw on, displayed in the window.
 ///
-/// Drawing functions take `i32` coordinates so that shapes can stick out of
-/// the canvas (negative coordinates): pixels outside are simply ignored.
+/// Pixels outside the canvas are simply ignored.
 pub struct Canvas {
     pub width: usize,
     pub height: usize,
@@ -34,19 +33,20 @@ impl Canvas {
         self.pixels[x + y * self.width] = color;
     }
 
-    pub fn fill_rect(&mut self, x: i32, y: i32, w: i32, h: i32, color: u32) {
+    pub fn fill_rect(&mut self, x: usize, y: usize, w: usize, h: usize, color: u32) {
         for j in y..y + h {
             for i in x..x + w {
-                self.put_pixel(i, j, color);
+                self.put_pixel(i as i32, j as i32, color);
             }
         }
     }
 
-    pub fn fill_circle(&mut self, cx: i32, cy: i32, r: i32, color: u32) {
+    pub fn fill_circle(&mut self, cx: usize, cy: usize, r: usize, color: u32) {
+        let r = r as i32;
         for dy in -r..=r {
             for dx in -r..=r {
                 if dx * dx + dy * dy <= r * r {
-                    self.put_pixel(cx + dx, cy + dy, color);
+                    self.put_pixel(cx as i32 + dx, cy as i32 + dy, color);
                 }
             }
         }

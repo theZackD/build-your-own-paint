@@ -16,7 +16,6 @@ use config::{HEIGHT, WIDTH};
 fn main() {
     let mut window = Window::new("Paint", WIDTH, HEIGHT, WindowOptions::default())
         .expect("could not open the window");
-    window.set_target_fps(60);
 
     let mut app = App::new(WIDTH, HEIGHT);
 
