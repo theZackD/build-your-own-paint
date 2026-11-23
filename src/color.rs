@@ -1,11 +1,11 @@
 //! Colors are stored as `u32` in the `0x00RRGGBB` format expected by minifb.
 
-pub const WHITE: u32 = 0x00FF_FFFF;
-pub const BLACK: u32 = 0x0000_0000;
-pub const LIGHT_GRAY: u32 = 0x00AA_AAAA;
-pub const GRAY: u32 = 0x0088_8888;
-pub const DARK_GRAY: u32 = 0x0044_4444;
-pub const SELECTION_BLUE: u32 = 0x0037_8ADD;
+pub const WHITE: u32 = 0x00FFFFFF;
+pub const BLACK: u32 = 0x00000000;
+pub const LIGHT_GRAY: u32 = 0x00AAAAAA;
+pub const GRAY: u32 = 0x00888888;
+pub const DARK_GRAY: u32 = 0x00444444;
+pub const SELECTION_BLUE: u32 = 0x00378ADD;
 
 pub fn rgb_to_u32(r: u8, g: u8, b: u8) -> u32 {
     ((r as u32) << 16) | ((g as u32) << 8) | (b as u32)
@@ -53,9 +53,9 @@ mod tests {
 
     #[test]
     fn hsv_primaries() {
-        assert_eq!(hsv_to_u32(0.0, 1.0, 1.0), 0x00FF_0000);
-        assert_eq!(hsv_to_u32(120.0, 1.0, 1.0), 0x0000_FF00);
-        assert_eq!(hsv_to_u32(240.0, 1.0, 1.0), 0x0000_00FF);
+        assert_eq!(hsv_to_u32(0.0, 1.0, 1.0), 0x00FF0000);
+        assert_eq!(hsv_to_u32(120.0, 1.0, 1.0), 0x0000FF00);
+        assert_eq!(hsv_to_u32(240.0, 1.0, 1.0), 0x000000FF);
         assert_eq!(hsv_to_u32(0.0, 0.0, 1.0), WHITE);
         assert_eq!(hsv_to_u32(123.0, 0.5, 0.0), BLACK);
     }
