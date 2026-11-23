@@ -13,4 +13,6 @@ pub enum Action {
         index: usize,
         last: Vec2,
     },
+    PickingHue,
+    PickingSatVal,
 }

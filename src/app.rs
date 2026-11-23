@@ -2,9 +2,9 @@ use minifb::{Key, KeyRepeat, MouseButton, MouseMode, Window};
 
 use crate::action::Action;
 use crate::canvas::Canvas;
-use crate::color::{GRAY, WHITE, rgb_to_u32};
+use crate::color::{GRAY, WHITE};
 use crate::shapes::{Shape, Tool, shape_under};
-use crate::ui::Toolbar;
+use crate::ui::{ColorPicker, Toolbar};
 use crate::vec2::Vec2;
 
 /// All the state of the application.
@@ -18,6 +18,7 @@ pub struct App {
     /// selection exists, and we could no longer modify the list.
     selected: Option<usize>,
     toolbar: Toolbar,
+    picker: ColorPicker,
     color: u32,
     mouse: Vec2,
     was_down: bool,
@@ -25,6 +26,7 @@ pub struct App {
 
 impl App {
     pub fn new(width: usize, height: usize) -> App {
+        let picker = ColorPicker::new(width as f32, height as f32);
         App {
             canvas: Canvas::new(width, height),
             shapes: Vec::new(),
@@ -32,7 +34,8 @@ impl App {
             action: Action::Idle,
             selected: None,
             toolbar: Toolbar::new(width as f32),
-            color: rgb_to_u32(50, 120, 220),
+            color: picker.color(),
+            picker,
             mouse: Vec2::ZERO,
             was_down: false,
         }
@@ -94,8 +97,14 @@ impl App {
     fn on_press(&mut self, p: Vec2) {
         self.action = Action::Idle;
 
-        if let Some(tool) = self.toolbar.tool_at(p) {
+        if self.toolbar.color_button.contains(p) {
+            self.picker.open = !self.picker.open;
+        } else if let Some(tool) = self.toolbar.tool_at(p) {
             self.tool = tool;
+        } else if self.picker.is_on_hue_bar(p) {
+            self.action = Action::PickingHue;
+        } else if self.picker.is_on_sv_square(p) {
+            self.action = Action::PickingSatVal;
         } else if let Some(i) = shape_under(&self.shapes, p) {
             self.selected = Some(i);
             self.action = Action::Moving { index: i, last: p };
@@ -112,7 +121,12 @@ impl App {
                 self.shapes[*index].translate(p - *last);
                 *last = p;
             }
+            Action::PickingHue => self.picker.pick_hue(p),
+            Action::PickingSatVal => self.picker.pick_sat_val(p),
             Action::Idle | Action::Drawing { .. } => {}
+        }
+        if self.picker.open {
+            self.color = self.picker.color();
         }
     }
 
@@ -143,6 +157,7 @@ impl App {
             Shape::from_points(self.tool, start, self.mouse, GRAY).draw(&mut self.canvas);
         }
 
-        self.toolbar.draw(&mut self.canvas, self.tool);
+        self.toolbar.draw(&mut self.canvas, self.tool, self.color);
+        self.picker.draw(&mut self.canvas);
     }
 }

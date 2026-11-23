@@ -17,3 +17,27 @@ pub fn u32_to_rgb(color: u32) -> (u8, u8, u8) {
     let b = (color & 0xFF) as u8;
     (r, g, b)
 }
+
+/// Converts a color from HSV (hue in degrees, saturation and value in [0, 1]).
+pub fn hsv_to_u32(h: f32, s: f32, v: f32) -> u32 {
+    let h = h.rem_euclid(360.0);
+    let c = s * v;
+    let h1 = h / 60.0;
+    let x = c * (1.0 - (h1 % 2.0 - 1.0).abs());
+    let m = v - c;
+
+    let (r, g, b) = match h1 as u32 {
+        0 => (c, x, 0.0),
+        1 => (x, c, 0.0),
+        2 => (0.0, c, x),
+        3 => (0.0, x, c),
+        4 => (x, 0.0, c),
+        _ => (c, 0.0, x),
+    };
+
+    rgb_to_u32(
+        ((r + m) * 255.0) as u8,
+        ((g + m) * 255.0) as u8,
+        ((b + m) * 255.0) as u8,
+    )
+}
