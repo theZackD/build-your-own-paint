@@ -1,25 +1,39 @@
 mod canvas;
 mod color;
+mod config;
 mod image;
 #[allow(dead_code)] // Vec2 comes back in chapter 5.
 mod vec2;
 
+use minifb::{Key, KeyRepeat, Window, WindowOptions};
+
 use canvas::Canvas;
-use color::rgb_to_u32;
+use color::{WHITE, rgb_to_u32};
+use config::{HEIGHT, WIDTH};
 use image::Image;
 
-fn main() -> std::io::Result<()> {
-    let mut canvas = Canvas::new(400, 300);
-    canvas.clear(rgb_to_u32(240, 240, 240));
+fn main() {
+    let mut window = Window::new("Paint", WIDTH, HEIGHT, WindowOptions::default())
+        .expect("could not open the window");
 
-    canvas.fill_rect(30, 30, 120, 80, rgb_to_u32(220, 50, 50));
-    canvas.fill_circle(260, 90, 50, rgb_to_u32(50, 120, 220));
-    canvas.draw_line(20, 280, 380, 160, rgb_to_u32(0, 0, 0));
+    let mut canvas = Canvas::new(WIDTH, HEIGHT);
 
-    // Shapes can stick out of the canvas: hidden pixels are simply ignored.
-    canvas.fill_circle(380, 280, 60, rgb_to_u32(50, 180, 80));
+    while window.is_open() && !window.is_key_down(Key::Escape) {
+        // Each frame, we clear the canvas and draw everything again.
+        canvas.clear(WHITE);
+        canvas.fill_rect(100, 100, 240, 160, rgb_to_u32(220, 50, 50));
+        canvas.fill_circle(600, 250, 120, rgb_to_u32(50, 120, 220));
+        canvas.draw_line(50, 650, 1030, 400, rgb_to_u32(0, 0, 0));
 
-    Image::from_canvas(&canvas).save_ppm("out.ppm")?;
-    println!("saved to out.ppm");
-    Ok(())
+        if window.is_key_pressed(Key::S, KeyRepeat::No) {
+            match Image::from_canvas(&canvas).save_ppm("screenshot.ppm") {
+                Ok(()) => println!("saved to screenshot.ppm"),
+                Err(e) => eprintln!("could not save the image: {e}"),
+            }
+        }
+
+        window
+            .update_with_buffer(&canvas.pixels, WIDTH, HEIGHT)
+            .expect("could not update the window");
+    }
 }
