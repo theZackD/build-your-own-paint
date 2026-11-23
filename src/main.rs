@@ -1,30 +1,24 @@
+mod image;
+#[allow(dead_code)] // Vec2 comes back in chapter 5.
 mod vec2;
 
-use vec2::{Vec2, longest};
+use image::Image;
 
-fn main() {
-    let a = Vec2::new(3.0, 4.0);
-    let b = Vec2::new(1.0, 2.0);
+fn main() -> std::io::Result<()> {
+    let mut img = Image::new(300, 200);
 
-    println!("a = {a}, b = {b}");
-    println!("a + b = {}", a + b);
-    println!("a - b = {}", a - b);
-    println!("a * 2 = {}", a * 2.0);
-    println!("a . b = {}", a.dot(b));
-    println!("|a| = {}", a.length());
-
-    match a.normalize() {
-        Ok(n) => println!("a normalized = {n}"),
-        Err(e) => println!("error: {e}"),
-    }
-    match Vec2::ZERO.normalize() {
-        Ok(n) => println!("zero normalized = {n}"),
-        Err(e) => println!("error: {e}"),
+    // A horizontal gradient, from black to white.
+    for y in 0..img.height {
+        for x in 0..img.width {
+            let shade = (x * 255 / img.width) as u8;
+            img.set_pixel(x, y, shade, shade, shade);
+        }
     }
 
-    match longest(&[a, b]) {
-        Some(p) => println!("longest = {p}"),
-        None => println!("no points"),
-    }
-    println!("longest of nothing = {:?}", longest(&[]));
+    // A red square on top.
+    img.fill_rect(100, 50, 100, 100, (255, 0, 0));
+
+    img.save_ppm("out.ppm")?;
+    println!("saved to out.ppm");
+    Ok(())
 }
