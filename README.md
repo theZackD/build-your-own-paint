@@ -6,7 +6,7 @@ You open a window, draw rectangles, circles and lines with the mouse, select the
 
 The tutorial walks through building it step by step, starting from an empty `cargo new`. It's aimed at people who have read the first chapters of the Rust Book and want to write a real program with it. It's available in English and French.
 
-The website is coming soon. I'll put the link here.
+You can follow along on the website https://www.buildyourownpaint.com/.
 
 ## Running it
 
@@ -53,19 +53,19 @@ git diff ch04-window ch05-mouse
 
 Every tag compiles and runs. The last one, `ch10-export`, is the same code as `master`.
 
-| Tag | Chapter |
-|---|---|
-| `ch00-setup` | Setup |
-| `ch01-vec2` | 2D vectors |
-| `ch02-ppm` | An image in memory |
-| `ch03-shapes` | Drawing shapes |
-| `ch04-window` | A window |
-| `ch05-mouse` | The mouse |
-| `ch06-shapes-enum` | Several shapes |
+| Tag                | Chapter              |
+| ------------------ | -------------------- |
+| `ch00-setup`       | Setup                |
+| `ch01-vec2`        | 2D vectors           |
+| `ch02-ppm`         | An image in memory   |
+| `ch03-shapes`      | Drawing shapes       |
+| `ch04-window`      | A window             |
+| `ch05-mouse`       | The mouse            |
+| `ch06-shapes-enum` | Several shapes       |
 | `ch07-select-move` | Selecting and moving |
-| `ch08-toolbar` | The toolbar |
-| `ch09-colors` | Colors |
-| `ch10-export` | Saving |
+| `ch08-toolbar`     | The toolbar          |
+| `ch09-colors`      | Colors               |
+| `ch10-export`      | Saving               |
 
 ## Videos
 
